@@ -1,0 +1,80 @@
+// ==UserScript==
+// @name        JSTools Updatelog
+// @namespace        http://tampermonkey.net/
+// @version        0.1
+// @description        「スクリプトツール一覧表」の各ツールの最終アップデート日付を取得
+// @author        AmebaBlogUser
+// @match        https://ameblo.jp/*
+// @icon        https://www.google.com/s2/favicons?sz=64&domain=ameba.jp
+// @noframes
+// @grant        none
+// ==/UserScript==
+
+
+let date_all=[];
+
+let links=document.querySelectorAll('#entryBody #ambt0 td:first-child a');
+
+for(let k=0; k<links.length; k++){
+    let url=links[k].getAttribute('href');
+    ajaxInspect(k, url); }
+
+
+
+function ajaxInspect(n, url){ // XMLHttpRequestを使ってデータを取得
+    url=url+'?ver='+new Date().getTime(); // キャッシュを抑止して取得
+    let ajax=new XMLHttpRequest;
+    ajax.open('GET', url, true);
+    let pub_date;
+
+    ajax.onload=function(){ // データ取得時の操作
+        let tmp_='<div id="tmp_div" style="display: none"></div>';
+        if(!document.querySelector('#tmp_div')){
+            document.body.insertAdjacentHTML('beforeend', tmp_); }
+
+        let tmp=document.querySelector('#tmp_div');
+        if(tmp){
+            tmp.innerHTML=ajax.responseText; // 取得データをtmpに展開
+            let elem=tmp.querySelector('script[type="application/ld+json"]');
+            if(elem){
+                let elem_data=elem.textContent;
+                let data=elem_data.split(',');
+                let pub_data=data.filter(function(data_text){
+                    return data_text.includes('datePublished'); });
+
+                if(pub_data){
+                    pub_date=pub_data.toString().replace(/[^0-9]/g, '').substr(0, 8);
+                    pub_date=
+                        pub_date.substr(0, 4) +'-'+ pub_date.substr(4, 2) +'-'+ pub_date.substr(6, 2);
+                    date_all[n]=pub_date; }}}
+
+        tmp.innerHTML=''; } // 取得データを削除
+
+    ajax.send(null); }
+
+
+
+setTimeout(()=>{
+
+    let ok=confirm('💢 日付データをファイル出力しますか？ 💢');
+    if(ok){
+        output(); }
+
+}, 4000);
+
+function output(){
+    let write_json=JSON.stringify(date_all);
+    let blob=new Blob([write_json], {type: 'application/json'});
+    try{
+        let a_elem=document.createElement('a');
+        a_elem.href=URL.createObjectURL(blob);
+        document.body.appendChild(a_elem);
+        a_elem.download='js_tools_date.json'; // 保存ファイル名
+        a_elem.click();
+        URL.revokeObjectURL(a_elem.href);
+        alert("✅  ファイルを保存しました\n"+
+              "　　ダウンロードフォルダーを確認してください"); }
+    catch(e){
+        alert("❌ ファイル保存時にエラーが発生しました\n"+
+              "　　ダウンロードフォルダーを確認してください"); }}
+
