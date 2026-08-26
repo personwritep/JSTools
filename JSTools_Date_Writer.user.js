@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name        JSTools Date Writer
+// @name        JSTools Date Writer ▢
 // @namespace        http://tampermonkey.net/
-// @version        0.1
+// @version        0.2
 // @description        「スクリプトツール一覧表」に更新日付データを記入「Ctrl+Shift+F10」
 // @author        Ameba Blog User
-// @match        https://blog.ameba.jp/ucs/entry/srventry*
-// @exclude        https://blog.ameba.jp/ucs/entry/srventrylist.do*
+// @match        https://blog.ameba.jp/ucs/entry/srventryinsertinput.do*
+// @match        https://blog.ameba.jp/ucs/entry/srventryupdateinput.do*
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=ameba.jp
 // @grant        none
 // @updateURL        https://github.com/personwritep/JSTools/raw/main/JSTools_Date_Writer.user.js
